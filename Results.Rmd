@@ -1,0 +1,66 @@
+---
+title: "Results"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, dpi = 400, 
+                      fig.path = "figures/", error = TRUE)
+```
+
+```{r message=FALSE}
+library(tidyverse)
+library(tsDyn)
+source("codes/utils.R")
+source("codes/dgp_functions.R")
+load("data/estimated_rank.RData")
+```
+
+```{r}
+estimated_rank_df %>% 
+  filter(nominal_size == .05) %>% 
+  filter(n == 3 & r == 0) %>% 
+  count(t, estimated_r, name = "p") %>% 
+  group_by(t) %>% 
+  mutate(p = p / sum(p)) %>% 
+  ggplot(aes(t, estimated_r, fill = p)) + 
+  geom_tile(color = "black") + 
+  geom_text(aes(label = scales::percent(p)))
+```
+
+Reject rate!
+
+```{r}
+estimated_rank_df %>% 
+  filter(r == 0) %>% 
+  count(n, nominal_size, t, estimated_r, name = "estim_count") %>% 
+  crossing(r = 0:3) %>% 
+  filter(n > r & estimated_r > r) %>% 
+  group_by(n, nominal_size, t, r) %>% 
+  summarise(value = sum(estim_count) / 2000) %>% 
+    arrange(desc(nominal_size)) %>% # wider in same order as in the paper
+    pivot_wider(names_from = nominal_size, names_prefix = "Nominal size = ", values_fill = 0) %>% 
+  select(n, t, r, everything()) %>% 
+  arrange(n, t, -r) %>% 
+  mutate_at(-(1:3), ~ scales::percent(., accuracy = .01)) %>% 
+  knitr::kable(caption = "podivinszky_tbl1", align = rep("c", 10))
+```
+
+```{r}
+estimated_rank_df %>% 
+  filter(t %in% c(50, 100) & nominal_size == .05) %>%
+  rename(true_r = r) %>% 
+  crossing(r = 0:2) %>% 
+  filter(n > r & estimated_r > r) %>% 
+  count(n, true_r, t, r, estimated_r, name = "estim_count") %>% 
+  group_by(n, true_r, t, r) %>% 
+  summarise(value = sum(estim_count) / 2000) %>% 
+  pivot_wider(names_from = t, values_from = value, names_prefix = "T = ", values_fill = 0) %>% 
+  mutate(across(starts_with("T "), scales::percent, accuracy = .01)) %>% 
+  arrange(n, true_r, -r) %>% 
+  knitr::kable(align = rep("c", 10), caption = "podivinszky_tbl2 2 és 3 idősoron futók csak")
+  
+```
+
+
+
