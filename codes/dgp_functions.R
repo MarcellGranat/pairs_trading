@@ -51,3 +51,27 @@ simulate_dgp <- function(n = 2, ci = 1, t = 250, p = .75, innov_sd = 1) {
   }
   out
 }
+
+podivinszky_dgp <- function(rho = .2, theta = .5, t = 50, warm_up = 100, innov_sd = 100) {
+  
+  x <- matrix(rnorm(n = 3, mean = 0, sd = innov_sd), ncol = 1)
+  for (i in 2:(t + warm_up)) {
+    x <- cbind(x, (
+      (matrix(c(-.4, .1, .1, .2, .1, .3), ncol = 2, byrow = TRUE) %*%
+         matrix(c(1, -2, theta, rho, -rho / 2, - rho * theta / 2), ncol = 3, byrow = TRUE) %*%
+         matrix(x[, ncol(x)]))  + 
+        matrix(rnorm(n = 3, mean = 0, sd = innov_sd), ncol = 1) + 
+        matrix(x[, ncol(x)])
+    ) 
+    )
+  }
+  
+  t(x) %>% 
+    data.frame() %>% 
+    slice((warm_up + 1):(warm_up + t)) %>% 
+    set_names("x", "y", "z") %>% 
+    tibble()
+  
+}
+
+
