@@ -39,6 +39,6 @@ vignettes/*.pdf
 .Renviron
 
 /data/*
-/docs/*
+/articles/*
 /reading_notes/*
 /notes/*

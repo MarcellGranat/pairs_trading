@@ -4,6 +4,7 @@ Results
 ``` r
 library(tidyverse)
 library(tsDyn)
+library(patchwork)
 source("codes/utils.R")
 source("codes/dgp_functions.R")
 load("data/estimated_rank.RData")
@@ -33,8 +34,8 @@ estimated_rank_df %>%
   filter(n > r & estimated_r > r) %>% 
   group_by(n, nominal_size, t, r) %>% 
   summarise(value = sum(estim_count) / 2000) %>% 
-    arrange(desc(nominal_size)) %>% # wider in same order as in the paper
-    pivot_wider(names_from = nominal_size, names_prefix = "Nominal size = ", values_fill = 0) %>% 
+  arrange(desc(nominal_size)) %>% # wider in same order as in the paper
+  pivot_wider(names_from = nominal_size, names_prefix = "Nominal size = ", values_fill = 0) %>% 
   select(n, t, r, everything()) %>% 
   arrange(n, t, -r) %>% 
   mutate_at(-(1:3), ~ scales::percent(., accuracy = .01)) %>% 
@@ -104,3 +105,58 @@ estimated_rank_df %>%
 |  3  |   2    |  0  | 0.15%  |  0.15%  |
 
 podivinszky_tbl2 2 és 3 idősoron futók csak
+
+# Podivinszky dgp
+
+``` r
+load("data/podivinszky_estimate.RData")
+```
+
+## Figure for DGPs
+
+``` r
+set.seed(1)
+
+(podivinszky_dgp(rho = 0, theta = 0) %>% 
+    ts() %>% 
+    autoplot() + ggtitle("rho = 0, theta = 0")) /
+  (podivinszky_dgp(rho = 1, theta = 1) %>% 
+     ts() %>% 
+     autoplot() + ggtitle("rho = 1, theta = 1") )/
+  (podivinszky_dgp(rho = 0, theta = 1) %>% 
+     ts() %>% 
+     autoplot() + ggtitle("rho = 0, theta = 1"))
+```
+
+![](figures/unnamed-chunk-6-1.png)<!-- -->
+
+## Reproduce table 2
+
+``` r
+podivinszky_estimate_df %>% 
+  count(t, rho, theta, estimated_r, name = "estim_count") %>% 
+  crossing(r = 0:2) %>% 
+  filter(estimated_r > r) %>% 
+  group_by(t, rho, theta, r) %>% 
+  summarise(value = sum(estim_count) / 2000) %>% 
+  pivot_wider(names_from = t, names_prefix = "T = ") %>% 
+  arrange(rho, theta, -r) %>% 
+  knitr::kable(caption = "Podivinszky tbl2 - reject rates", align = rep("c", 6))
+```
+
+    ## `summarise()` has grouped output by 't', 'rho', 'theta'. You can override using
+    ## the `.groups` argument.
+
+| rho | theta |  r  | T = 50 | T = 100 | T = 500 |
+|:---:|:-----:|:---:|:------:|:-------:|:-------:|
+|  0  |   0   |  2  | 0.0095 | 0.0030  | 0.0055  |
+|  0  |   0   |  1  | 0.0710 | 0.0555  | 0.0575  |
+|  0  |   0   |  0  | 0.9980 | 1.0000  | 1.0000  |
+|  0  |   1   |  2  | 0.0060 | 0.0035  | 0.0035  |
+|  0  |   1   |  1  | 0.0570 | 0.0605  | 0.0515  |
+|  0  |   1   |  0  | 1.0000 | 1.0000  | 1.0000  |
+|  1  |   1   |  2  | 0.0815 | 0.0775  | 0.0485  |
+|  1  |   1   |  1  | 1.0000 | 1.0000  | 1.0000  |
+|  1  |   1   |  0  | 1.0000 | 1.0000  | 1.0000  |
+
+Podivinszky tbl2 - reject rates

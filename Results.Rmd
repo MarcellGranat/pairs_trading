@@ -11,6 +11,7 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, dpi = 400,
 ```{r message=FALSE}
 library(tidyverse)
 library(tsDyn)
+library(patchwork)
 source("codes/utils.R")
 source("codes/dgp_functions.R")
 load("data/estimated_rank.RData")
@@ -38,8 +39,8 @@ estimated_rank_df %>%
   filter(n > r & estimated_r > r) %>% 
   group_by(n, nominal_size, t, r) %>% 
   summarise(value = sum(estim_count) / 2000) %>% 
-    arrange(desc(nominal_size)) %>% # wider in same order as in the paper
-    pivot_wider(names_from = nominal_size, names_prefix = "Nominal size = ", values_fill = 0) %>% 
+  arrange(desc(nominal_size)) %>% # wider in same order as in the paper
+  pivot_wider(names_from = nominal_size, names_prefix = "Nominal size = ", values_fill = 0) %>% 
   select(n, t, r, everything()) %>% 
   arrange(n, t, -r) %>% 
   mutate_at(-(1:3), ~ scales::percent(., accuracy = .01)) %>% 
@@ -59,8 +60,45 @@ estimated_rank_df %>%
   mutate(across(starts_with("T "), scales::percent, accuracy = .01)) %>% 
   arrange(n, true_r, -r) %>% 
   knitr::kable(align = rep("c", 10), caption = "podivinszky_tbl2 2 és 3 idősoron futók csak")
-  
+
+```
+
+# Podivinszky dgp
+
+```{r}
+load("data/podivinszky_estimate.RData")
+```
+
+## Figure for DGPs
+
+```{r fig.height=8}
+set.seed(1)
+
+(podivinszky_dgp(rho = 0, theta = 0) %>% 
+    ts() %>% 
+    autoplot() + ggtitle("rho = 0, theta = 0")) /
+  (podivinszky_dgp(rho = 1, theta = 1) %>% 
+     ts() %>% 
+     autoplot() + ggtitle("rho = 1, theta = 1") )/
+  (podivinszky_dgp(rho = 0, theta = 1) %>% 
+     ts() %>% 
+     autoplot() + ggtitle("rho = 0, theta = 1"))
 ```
 
 
+
+## Reproduce table 2
+
+```{r}
+podivinszky_estimate_df %>% 
+  count(t, rho, theta, estimated_r, name = "estim_count") %>% 
+  crossing(r = 0:2) %>% 
+  filter(estimated_r > r) %>% 
+  group_by(t, rho, theta, r) %>% 
+  summarise(value = sum(estim_count) / 2000) %>% 
+  pivot_wider(names_from = t, names_prefix = "T = ") %>% 
+  arrange(rho, theta, -r) %>% 
+  knitr::kable(caption = "Podivinszky tbl2 - reject rates", align = rep("c", 6))
+
+```
 
