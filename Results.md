@@ -132,11 +132,13 @@ set.seed(1)
 
 ## Reproduce table 2
 
+### Test on 3 variables
+
 ``` r
 podivinszky_estimate_df %>% 
-  count(t, rho, theta, estimated_r, name = "estim_count") %>% 
+  count(t, rho, theta, xyz_r, name = "estim_count") %>% 
   crossing(r = 0:2) %>% 
-  filter(estimated_r > r) %>% 
+  filter(xyz_r > r) %>% 
   group_by(t, rho, theta, r) %>% 
   summarise(value = sum(estim_count) / 2000) %>% 
   pivot_wider(names_from = t, names_prefix = "T = ") %>% 
@@ -149,14 +151,42 @@ podivinszky_estimate_df %>%
 
 | rho | theta |  r  | T = 50 | T = 100 | T = 500 |
 |:---:|:-----:|:---:|:------:|:-------:|:-------:|
-|  0  |   0   |  2  | 0.0095 | 0.0030  | 0.0055  |
-|  0  |   0   |  1  | 0.0710 | 0.0555  | 0.0575  |
-|  0  |   0   |  0  | 0.9980 | 1.0000  | 1.0000  |
-|  0  |   1   |  2  | 0.0060 | 0.0035  | 0.0035  |
-|  0  |   1   |  1  | 0.0570 | 0.0605  | 0.0515  |
+|  0  |   0   |  2  | 0.0070 | 0.0050  | 0.0055  |
+|  0  |   0   |  1  | 0.0600 | 0.0515  | 0.0460  |
+|  0  |   0   |  0  | 0.9995 | 1.0000  | 1.0000  |
+|  0  |   1   |  2  | 0.0095 | 0.0075  | 0.0045  |
+|  0  |   1   |  1  | 0.0730 | 0.0540  | 0.0540  |
 |  0  |   1   |  0  | 1.0000 | 1.0000  | 1.0000  |
-|  1  |   1   |  2  | 0.0815 | 0.0775  | 0.0485  |
+|  1  |   1   |  2  | 0.0895 | 0.0725  | 0.0625  |
 |  1  |   1   |  1  | 1.0000 | 1.0000  | 1.0000  |
 |  1  |   1   |  0  | 1.0000 | 1.0000  | 1.0000  |
+
+Podivinszky tbl2 - reject rates
+
+### Test on 2 variables (x, y)
+
+``` r
+podivinszky_estimate_df %>% 
+  count(t, rho, theta, xy_r, name = "estim_count") %>% 
+  crossing(r = 0:1) %>% 
+  filter(xy_r > r) %>% 
+  group_by(t, rho, theta, r) %>% 
+  summarise(value = sum(estim_count) / 2000) %>% 
+  pivot_wider(names_from = t, names_prefix = "T = ") %>% 
+  arrange(rho, theta, -r) %>% 
+  knitr::kable(caption = "Podivinszky tbl2 - reject rates", align = rep("c", 6))
+```
+
+    ## `summarise()` has grouped output by 't', 'rho', 'theta'. You can override using
+    ## the `.groups` argument.
+
+| rho | theta |  r  | T = 50 | T = 100 | T = 500 |
+|:---:|:-----:|:---:|:------:|:-------:|:-------:|
+|  0  |   0   |  1  | 0.0570 | 0.0525  | 0.0585  |
+|  0  |   0   |  0  | 1.0000 | 1.0000  | 1.0000  |
+|  0  |   1   |  1  | 0.0270 | 0.0275  | 0.0375  |
+|  0  |   1   |  0  | 0.5120 | 0.5885  | 0.6780  |
+|  1  |   1   |  1  | 0.2335 | 0.2225  | 0.1615  |
+|  1  |   1   |  0  | 0.9875 | 1.0000  | 1.0000  |
 
 Podivinszky tbl2 - reject rates

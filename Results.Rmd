@@ -1,6 +1,8 @@
 ---
 title: "Results"
 output: github_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
@@ -89,16 +91,32 @@ set.seed(1)
 
 ## Reproduce table 2
 
+### Test on 3 variables
+
 ```{r}
 podivinszky_estimate_df %>% 
-  count(t, rho, theta, estimated_r, name = "estim_count") %>% 
+  count(t, rho, theta, xyz_r, name = "estim_count") %>% 
   crossing(r = 0:2) %>% 
-  filter(estimated_r > r) %>% 
+  filter(xyz_r > r) %>% 
   group_by(t, rho, theta, r) %>% 
   summarise(value = sum(estim_count) / 2000) %>% 
   pivot_wider(names_from = t, names_prefix = "T = ") %>% 
   arrange(rho, theta, -r) %>% 
   knitr::kable(caption = "Podivinszky tbl2 - reject rates", align = rep("c", 6))
 
+```
+
+### Test on 2 variables (x, y)
+
+```{r}
+podivinszky_estimate_df %>% 
+  count(t, rho, theta, xy_r, name = "estim_count") %>% 
+  crossing(r = 0:1) %>% 
+  filter(xy_r > r) %>% 
+  group_by(t, rho, theta, r) %>% 
+  summarise(value = sum(estim_count) / 2000) %>% 
+  pivot_wider(names_from = t, names_prefix = "T = ") %>% 
+  arrange(rho, theta, -r) %>% 
+  knitr::kable(caption = "Podivinszky tbl2 - reject rates", align = rep("c", 6))
 ```
 
