@@ -120,3 +120,45 @@ podivinszky_estimate_df %>%
   knitr::kable(caption = "Podivinszky tbl2 - reject rates", align = rep("c", 6))
 ```
 
+# Podivinszky no wp
+
+```{r}
+load("data/podivinszky_no_wp_estimate.RData")
+```
+
+
+## Reproduce table 2
+
+### Test on 3 variables
+
+```{r}
+podivinszky_no_wp_estimate %>% 
+  filter(t %in% c(50, 100)) %>% 
+  count(t, rho, theta, xyz_r, name = "estim_count") %>% 
+  crossing(r = 0:2) %>% 
+  filter(xyz_r > r) %>% 
+  group_by(t, rho, theta, r) %>% 
+  summarise(value = sum(estim_count) / 2000) %>% 
+  pivot_wider(names_from = t, names_prefix = "T = ") %>% 
+  arrange(rho, theta, -r) %>% 
+  mutate(r = str_c("<=", r)) %>% 
+  knitr::kable(caption = "Podivinszky tbl2 - reject rates", align = rep("c", 6))
+
+```
+
+### Test on 2 variables (x, y)
+
+```{r}
+podivinszky_no_wp_estimate %>% 
+  filter(t %in% c(50, 100)) %>% 
+  count(t, rho, theta, xy_r, name = "estim_count") %>% 
+  crossing(r = 0:1) %>% 
+  filter(xy_r > r) %>% 
+  group_by(t, rho, theta, r) %>% 
+  summarise(value = sum(estim_count) / 2000) %>% 
+  pivot_wider(names_from = t, names_prefix = "T = ") %>% 
+  arrange(rho, theta, -r) %>% 
+  mutate(r = str_c("<=", r)) %>% 
+  knitr::kable(caption = "Podivinszky tbl2 - reject rates", align = rep("c", 6))
+```
+
