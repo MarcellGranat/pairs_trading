@@ -261,3 +261,57 @@ podivinszky_no_wp_estimate %>%
 |  1  |   1   | \<=0 | 0.9870 | 1.0000  |
 
 Podivinszky tbl2 - reject rates
+
+``` r
+podivinszky_no_wp_estimate %>% 
+  count(t, rho, theta, xy_r) %>% 
+  group_by(t, rho, theta) %>% 
+  mutate(p = n / sum(n)) %>% 
+  ggplot(aes(t, p, fill = as.factor(xy_r))) + 
+  geom_area(color = "black") + 
+  facet_wrap(vars(rho, theta), ncol = 1)
+```
+
+![](figures/unnamed-chunk-12-1.png)<!-- -->
+
+``` r
+podivinszky_no_wp_estimate %>% 
+  count(t, rho, theta, xyz_r) %>% 
+  group_by(t, rho, theta) %>% 
+  mutate(p = n / sum(n)) %>% 
+  ggplot(aes(t, p, fill = as.factor(xyz_r))) + 
+  geom_area(color = "black") + 
+  facet_wrap(vars(rho, theta), ncol = 1)
+```
+
+![](figures/unnamed-chunk-13-1.png)<!-- -->
+
+# Yield data
+
+``` r
+load("data/yield_df.RData")
+```
+
+``` r
+yield_df %>% 
+  pivot_longer(-1, names_to = "maturity") %>% 
+  na.omit() %>% 
+  group_by(maturity) %>% 
+  summarise(interval = str_c(min(time), " - ", max(time)), n = n()) %>% 
+  knitr::kable()
+```
+
+| maturity | interval                |    n |
+|:---------|:------------------------|-----:|
+| mo1      | 2001-07-31 - 2022-03-21 | 5162 |
+| mo2      | 2018-10-16 - 2022-03-21 |  857 |
+| mo3      | 1990-01-02 - 2022-03-21 | 8058 |
+| mo6      | 1990-01-02 - 2022-03-21 | 8061 |
+| yr1      | 1990-01-02 - 2022-03-21 | 8061 |
+| yr10     | 1990-01-02 - 2022-03-21 | 8061 |
+| yr2      | 1990-01-02 - 2022-03-21 | 8061 |
+| yr20     | 1993-10-01 - 2022-03-21 | 7122 |
+| yr3      | 1990-01-02 - 2022-03-21 | 8061 |
+| yr30     | 1990-01-02 - 2022-03-21 | 7067 |
+| yr5      | 1990-01-02 - 2022-03-21 | 8061 |
+| yr7      | 1990-01-02 - 2022-03-21 | 8061 |
